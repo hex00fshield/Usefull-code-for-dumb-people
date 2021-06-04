@@ -1,0 +1,70 @@
+On the machine:
+
+1- Check Java-JDK version for current jenkins, and install it.
+   
+   Update Command
+
+---
+
+2- Install Docker Engine and setup
+   
+   https://docs.docker.com/engine/install
+   Update command
+   
+   - run Docker with: systemctl start docker 
+   - see if docker exists with: sudo docker ps (this also lists Instances running on current Docker)
+
+---
+
+3- Pull Jenkins and setup 
+
+   https://hub.docker.com/r/jenkins/jenkins/
+                                                                        
+   - Run Jenkins with: docker run -d -p 8080:8080 -p 50000:50000 --name YOUR-PREFFERED-NAME jenkins/jenkins:latest 
+   - See if Jenkins is running inside docker with: sudo docker ps
+   - access jenkins UI(user interface) on the specified Port ( default is localhost:8080 )
+   - Select the plugins to be installed ( GIT and PIPELINE are MUSTS)
+   - configure the first admin account by typing the password informed on the terminal ( or run => sudo docker exec -it YOUR-PREFFERED-NAME bash
+     ,to retrieve it directly from the informed directory /var/jenkins_home/secrets/initialAdminPassword )
+   - Go to MANAGE JENKINS > PLUGINS, and install SonarQube Scanner
+   
+   
+---
+
+ 4- Pull SonarQube and Setup
+  
+    https://hub.docker.com/_/sonarqube/
+    
+    - Run SonarQube with: docker run -d --name YOUR-PREFFERED-NAME -p 9000:9000 sonarqube
+    - Access SonarQube UI(user interface) on the specified Port ( default is localhost:9000)
+    - Do the first access with admin/admin (Username/Password)
+---
+
+ 5- Integrate SonarQube + Jenkins
+    
+    - Access jenkins container by terminal: docker exec -it YOUR-PREFERRED-NAME bash
+    - Create sonar-scanner directory under /var/jenkins_home: mkdir sonar-scanner
+    - Download the sonar scanner from https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/ via wget( always check for latest version ):
+      wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-CHECK-VERSION-ON-WEBSITE 
+    - Unzip the downloaded file: unzip sonar-scanner-cli-x.x.x.x-linux.zip
+    
+    - Go to Jenkins UI, Manage Jenkins > Global Tool Configuration > SonarQube Scanner
+    - Uncheck " install automatically " > Name the scanner > on "SONAR_RUNNER_HOME" insert the scanner directory path 
+       ( you can do that inside the scanner folder, with pwd command ) and hit save
+    - Get the Ip from the HOST device ( usually on en0) as inet, with the ifconfig command
+    - go to SonarQube UI > Administration > Configuration > Webhooks > create
+    - Name the webhook
+    - Insert the HOST IP as:  http://<host_ip>:8080/sonarqube-webhook (8080 for the default jenkins port, and /sonarqube-webhook for it to work)
+    - Set a secret for more secure usage.
+    
+    
+    - in SonarQube, generate an access token that will be used by Jenkins: My Account > Security > Tokens, copy the token
+    - in Jenkins, go to Manage Jenkins> Manage Credentials> Global > add credentials
+    - se the KIND as SECRET TEXT, type the sonar token on the SECRET field.
+    - Go to Manage Jenkins > Configure System > SonarQube Servers and set up the URL as http://<host_ip>:9000, set the authentication token as "secret text"
+    - Apply and save
+    
+    
+    
+    
+    
