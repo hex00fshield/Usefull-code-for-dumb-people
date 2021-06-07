@@ -1,0 +1,21 @@
+Insert the "sonar-project.properties" file, inside the root directory on the github project
+Link the project, to the scan, by setting the "key" inside the .properties file
+
+Go to jenkins>configure tools> sonarQube scanner, and either select a scanner to be installed ( easier) or specify the scanner home ( by unchecking the automatic install box)
+
+Create a pipeline at jenkins: 
+
+node {
+  stage('SCM') {
+    git branch:'DEFINE BRANCH', url: 'DEFINE GITHUB URL'
+  }
+  stage('SonarQube analysis') {
+    
+    def scannerHome = tool 'NAME_DEFINED_ON_JENKINS_TOOLS';
+    withSonarQubeEnv('SonarQube') {
+      sh "${scannerHome}/bin/sonar-scanner"
+    }
+  }
+}
+
+*** Don't forget to configure the TOOLS section, the SERVER section, and to unzip the Sonar scanner.
